@@ -191,15 +191,19 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- split windows
-vim.keymap.set('n', '<leader>sv', '<C-w>v') -- split veritcally
-vim.keymap.set('n', '<leader>sh', '<C-w>s') -- split horizontally
-vim.keymap.set('n', '<leader>se', '<C-w>=') -- equal windows
-vim.keymap.set('n', '<leader>sx', ':close<CR>') -- close
+vim.keymap.set("n", "<leader>sv", "<C-w>v")     -- split veritcally
+vim.keymap.set("n", "<leader>sh", "<C-w>s")     -- split horizontally
+vim.keymap.set("n", "<leader>se", "<C-w>=")     -- equal windows
+vim.keymap.set("n", "<leader>sx", ":close<CR>") -- close
 
 vim.keymap.set('i', 'jk', '<ESC>')
 
--- nvim tree
-vim.keymap.set('n', '<leader>ee', ':NvimTreeToggle<CR>')
+
+-- bufferline
+vim.keymap.set("n", "<leader>bn", "<cmd>BufferLineCycleNext<cr>")
+vim.keymap.set("n", "<leader>bb", "<cmd>BufferLineCyclePrev<cr>")
+vim.keymap.set("n", "<leader>bf", "<cmd>BufferLinePick<cr>")
+vim.keymap.set("n", "<leader>bx", "<cmd>BufDel<CR>")
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -334,12 +338,6 @@ require('lazy').setup({
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
-      {
-        'nvim-telescope/telescope-live-grep-args.nvim',
-        -- This will not install any breaking changes.
-        -- For major updates, this must be adjusted manually.
-        version = '^1.0.0',
-      },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
@@ -379,20 +377,7 @@ require('lazy').setup({
             },
           },
         },
-        pickers = {
-          lsp_definitions = {
-            show_line = false,
-          },
-          lsp_implementations = {
-            show_line = false,
-          },
-          lsp_references = {
-            show_line = false,
-          },
-          find_files = {
-            theme = 'dropdown',
-          },
-        },
+        -- pickers = {}
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -402,12 +387,10 @@ require('lazy').setup({
 
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
-      pcall(require('telescope').load_extension, 'live_grep_args')
       pcall(require('telescope').load_extension, 'ui-select')
 
       -- See `:help telescope.builtin`
       local builtin = require 'telescope.builtin'
-      local extensions = require('telescope').extensions
       vim.keymap.set('n', '<leader>sh', builtin.help_tags, { desc = '[S]earch [H]elp' })
       vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
       vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
@@ -418,7 +401,6 @@ require('lazy').setup({
       vim.keymap.set('n', '<leader>sr', builtin.resume, { desc = '[S]earch [R]esume' })
       vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
       vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
-      vim.keymap.set('n', '<leader>sa', extensions.live_grep_args.live_grep_args, { desc = '[S]earch by [A]rgs' })
 
       -- Slightly advanced example of overriding default behavior and theme
       vim.keymap.set('n', '<leader>/', function()
@@ -612,30 +594,8 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`tsserver`) will work just fine
-        tsserver = {
-          root_dir = require('lspconfig').util.root_pattern 'package.json',
-        },
-        denols = {
-          root_dir = require('lspconfig').util.root_pattern 'deno.json',
-        },
-        tailwindcss = {
-          settings = {
-            tailwindCSS = {
-              experimental = {
-                classRegex = {
-                  { 'cva\\(([^)]*)\\)', '["\']([^"\']*).*?["\'`]' },
-                  { 'cx\\(([^)]*)\\)', "(?:'|\"|)([^']*)(?:'|\"|)" },
-                },
-              },
-            },
-          },
-        },
-
-        ruff_lsp = {
-          on_attach = function(client)
-            client.server_capabilities.hoverProvider = false
-          end,
-        },
+        -- tsserver = {},
+        --
 
         lua_ls = {
           -- cmd = {...},
@@ -881,8 +841,6 @@ require('lazy').setup({
         },
       }
 
-      require('mini.move').setup()
-
       -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
@@ -956,6 +914,7 @@ require('lazy').setup({
     end,
   },
 
+
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.
@@ -969,7 +928,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.indent_line',
   -- require 'kickstart.plugins.lint',
   require 'kickstart.plugins.autopairs',
-  -- require 'kickstart.plugins.neo-tree',
+  require 'kickstart.plugins.neo-tree',
   require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
