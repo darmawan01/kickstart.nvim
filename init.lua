@@ -198,12 +198,15 @@ vim.keymap.set("n", "<leader>sx", ":close<CR>") -- close
 
 vim.keymap.set('i', 'jk', '<ESC>')
 
-
 -- bufferline
 vim.keymap.set("n", "<leader>bn", "<cmd>BufferLineCycleNext<cr>")
 vim.keymap.set("n", "<leader>bb", "<cmd>BufferLineCyclePrev<cr>")
 vim.keymap.set("n", "<leader>bf", "<cmd>BufferLinePick<cr>")
 vim.keymap.set("n", "<leader>bx", "<cmd>BufDel<CR>")
+
+-- nvim tree
+vim.keymap.set('n', '<leader>ee', ':NvimTreeToggle<CR>')
+vim.keymap.set('n', '<leader>ef', ':NvimTreeFindFile<CR>')
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
@@ -338,6 +341,12 @@ require('lazy').setup({
         end,
       },
       { 'nvim-telescope/telescope-ui-select.nvim' },
+      {
+        'nvim-telescope/telescope-live-grep-args.nvim',
+        -- This will not install any breaking changes.
+        -- For major updates, this must be adjusted manually.
+        version = '^1.0.0',
+      },
 
       -- Useful for getting pretty icons, but requires a Nerd Font.
       { 'nvim-tree/nvim-web-devicons', enabled = vim.g.have_nerd_font },
@@ -377,7 +386,20 @@ require('lazy').setup({
             },
           },
         },
-        -- pickers = {}
+        pickers = {
+          lsp_definitions = {
+            show_line = false,
+          },
+          lsp_implementations = {
+            show_line = false,
+          },
+          lsp_references = {
+            show_line = false,
+          },
+          find_files = {
+            theme = 'dropdown',
+          },
+        },
         extensions = {
           ['ui-select'] = {
             require('telescope.themes').get_dropdown(),
@@ -387,6 +409,7 @@ require('lazy').setup({
 
       -- Enable Telescope extensions if they are installed
       pcall(require('telescope').load_extension, 'fzf')
+      pcall(require('telescope').load_extension, 'live_grep_args')
       pcall(require('telescope').load_extension, 'ui-select')
 
       -- See `:help telescope.builtin`
