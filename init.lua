@@ -153,6 +153,16 @@ vim.opt.cursorline = true
 
 -- Minimal number of screen lines to keep above and below the cursor.
 vim.opt.scrolloff = 10
+vim.opt.wrap = false
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "python",
+  command = "setlocal colorcolumn=80,120"
+})
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = {"javascript", "javascriptreact", "typescript", "typescriptreact"},
+  command = "setlocal colorcolumn=120"
+})
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
@@ -191,18 +201,18 @@ vim.keymap.set('t', '<Esc><Esc>', '<C-\\><C-n>', { desc = 'Exit terminal mode' }
 -- vim.keymap.set('n', '<C-k>', '<C-w><C-k>', { desc = 'Move focus to the upper window' })
 
 -- split windows
-vim.keymap.set("n", "<leader>sv", "<C-w>v")     -- split veritcally
-vim.keymap.set("n", "<leader>sh", "<C-w>s")     -- split horizontally
-vim.keymap.set("n", "<leader>se", "<C-w>=")     -- equal windows
-vim.keymap.set("n", "<leader>sx", ":close<CR>") -- close
+vim.keymap.set('n', '<leader>sv', '<C-w>v') -- split veritcally
+vim.keymap.set('n', '<leader>sh', '<C-w>s') -- split horizontally
+vim.keymap.set('n', '<leader>se', '<C-w>=') -- equal windows
+vim.keymap.set('n', '<leader>sx', ':close<CR>') -- close
 
 vim.keymap.set('i', 'jk', '<ESC>')
 
 -- bufferline
-vim.keymap.set("n", "<leader>bn", "<cmd>BufferLineCycleNext<cr>")
-vim.keymap.set("n", "<leader>bb", "<cmd>BufferLineCyclePrev<cr>")
-vim.keymap.set("n", "<leader>bf", "<cmd>BufferLinePick<cr>")
-vim.keymap.set("n", "<leader>bx", "<cmd>BufDel<CR>")
+vim.keymap.set('n', '<leader>bn', '<cmd>BufferLineCycleNext<cr>')
+vim.keymap.set('n', '<leader>bb', '<cmd>BufferLineCyclePrev<cr>')
+vim.keymap.set('n', '<leader>bf', '<cmd>BufferLinePick<cr>')
+vim.keymap.set('n', '<leader>bx', '<cmd>BufDel<CR>')
 
 -- nvim tree
 vim.keymap.set('n', '<leader>ee', ':NvimTreeToggle<CR>')
@@ -230,6 +240,12 @@ if not vim.loop.fs_stat(lazypath) then
   vim.fn.system { 'git', 'clone', '--filter=blob:none', '--branch=stable', lazyrepo, lazypath }
 end ---@diagnostic disable-next-line: undefined-field
 vim.opt.rtp:prepend(lazypath)
+
+-- fold using ufo
+vim.o.foldcolumn = '1' -- '0' is not bad
+vim.o.foldlevel = 99 -- Using ufo provider need a large value, feel free to decrease the value
+vim.o.foldlevelstart = 99
+vim.o.foldenable = true
 
 -- [[ Configure and install plugins ]]
 --
@@ -499,6 +515,7 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('LspAttach', {
         group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
         callback = function(event)
+          local bufnr = event.buf
           -- NOTE: Remember that Lua is a real programming language, and as such it is possible
           -- to define small helper and utility functions so you don't have to repeat yourself.
           --
@@ -586,6 +603,15 @@ require('lazy').setup({
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled())
             end, '[T]oggle Inlay [H]ints')
+          end
+
+          local navic = require 'nvim-navic'
+
+          if navic and client and client.server_capabilities.documentSymbolProvider then
+            print 'Attaching nvim-navic to LSP client' -- Add a print statement for debugging
+            navic.attach(client, bufnr)
+          else
+            print 'nvim-navic not attached. Missing requirements.' -- Add a print statement for debugging
           end
         end,
       })
@@ -936,7 +962,6 @@ require('lazy').setup({
       --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
     end,
   },
-
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
