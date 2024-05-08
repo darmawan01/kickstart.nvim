@@ -81,9 +81,9 @@ return { -- Fuzzy Finder (files, lsp, etc)
         lsp_references = {
           show_line = false,
         },
-        find_files = {
-          theme = 'dropdown',
-        },
+        -- find_files = {
+        --   theme = 'dropdown',
+        -- },
       },
       extensions = {
         ['ui-select'] = {
