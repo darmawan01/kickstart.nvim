@@ -36,7 +36,7 @@ return {
       return newVirtText
     end
     require('ufo').setup {
-      -- fold_virt_text_handler = handler,
+      fold_virt_text_handler = handler
     }
   end,
 }

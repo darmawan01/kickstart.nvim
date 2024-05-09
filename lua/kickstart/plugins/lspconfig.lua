@@ -47,7 +47,6 @@ return { -- LSP Configuration & Plugins
     vim.api.nvim_create_autocmd('LspAttach', {
       group = vim.api.nvim_create_augroup('kickstart-lsp-attach', { clear = true }),
       callback = function(event)
-        local bufnr = event.buf
         -- NOTE: Remember that Lua is a real programming language, and as such it is possible
         -- to define small helper and utility functions so you don't have to repeat yourself.
         --
@@ -164,6 +163,7 @@ return { -- LSP Configuration & Plugins
     --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
     --  - settings (table): Override the default settings passed when initializing the server.
     --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+    local lspconfig_util = require('lspconfig').util
     local servers = {
       -- clangd = {},
       -- gopls = {},
@@ -175,8 +175,89 @@ return { -- LSP Configuration & Plugins
       --    https://github.com/pmizio/typescript-tools.nvim
       --
       -- But for many setups, the LSP (`tsserver`) will work just fine
-      -- tsserver = {},
-      --
+      tsserver = {
+        on_attach = function(client, bufnr)
+          -- on_attach(client, bufnr)
+          vim.keymap.set('n', '<leader>ro', function()
+            vim.lsp.buf.execute_command {
+              command = '_typescript.organizeImports',
+              arguments = { vim.fn.expand '%:p' },
+            }
+          end, { buffer = bufnr, remap = false })
+        end,
+        root_dir = function(filename, bufnr)
+          local denoRootDir = lspconfig_util.root_pattern('deno.json', 'deno.json')(filename)
+          if denoRootDir then
+            -- print('this seems to be a deno project; returning nil so that tsserver does not attach');
+            return nil
+            -- else
+            -- print('this seems to be a ts project; return root dir based on package.json')
+          end
+
+          return lspconfig_util.root_pattern 'package.json'(filename)
+        end,
+        single_file_support = false,
+      },
+
+      denols = {
+        root_dir = lspconfig_util.root_pattern('deno.json', 'deno.jsonc'),
+        init_options = {
+          lint = true,
+          unstable = true,
+          suggest = {
+            imports = {
+              hosts = {
+                ['https://deno.land'] = true,
+                ['https://cdn.nest.land'] = true,
+                ['https://crux.land'] = true,
+              },
+            },
+          },
+        },
+      },
+
+      tailwindcss = {
+        root_dir = lspconfig_util.root_pattern('tailwind.config.js', 'tailwind.config.ts'),
+        settings = {
+          tailwindCSS = {
+            experimental = {
+              classRegex = {
+                -- allow tailwindcss lsp to run inside `cx` and `cva`
+                { 'cva\\(([^)]*)\\)', '["\'`]([^"\'`]*).*?["\'`]' },
+                { 'cx\\(([^)]*)\\)', "(?:'|\"|`)([^']*)(?:'|\"|`)" },
+              },
+            },
+          },
+        },
+      },
+
+      emmet_ls = {
+        filetypes = {
+          'html',
+          'typescriptreact',
+          'javascriptreact',
+          'css',
+          'sass',
+          'scss',
+          'less',
+          'svelte',
+          'vue',
+        },
+      },
+
+      -- python formatter
+      ruff_lsp = {
+        on_attach = function(client)
+          client.server_capabilities.hoverProvider = false
+        end,
+      },
+
+      biome = {},
+      eslint = {},
+      htmx = {},
+      html = {},
+      cssls = {},
+      ----------
 
       lua_ls = {
         -- cmd = {...},
