@@ -23,6 +23,7 @@ return { -- Highlight, edit, and navigate code
       'toml',
       'prisma',
       'vue',
+      'go'
     },
     -- Autoinstall languages that are not installed
     auto_install = true,
