@@ -196,7 +196,7 @@ return { -- LSP Configuration & Plugins
 
           return lspconfig_util.root_pattern 'package.json'(filename)
         end,
-        single_file_support = false,
+        single_file_support = true,
       },
 
       denols = {
@@ -252,7 +252,9 @@ return { -- LSP Configuration & Plugins
         end,
       },
 
-      biome = {},
+      biome = {
+        single_file_support = true
+      },
       eslint = {},
       htmx = {},
       html = {},
