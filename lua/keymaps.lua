@@ -45,12 +45,14 @@ vim.keymap.set('i', 'jk', '<ESC>')
 -- bufferline
 vim.keymap.set('n', '<leader>bn', '<cmd>BufferLineCycleNext<cr>')
 vim.keymap.set('n', '<leader>bb', '<cmd>BufferLineCyclePrev<cr>')
+vim.keymap.set('n', '<leader>bmp', '<cmd>BufferLineMovePrev<cr>')
+vim.keymap.set('n', '<leader>bmn', '<cmd>BufferLineMoveNext<cr>')
 vim.keymap.set('n', '<leader>bf', '<cmd>BufferLinePick<cr>')
 vim.keymap.set('n', '<leader>bx', '<cmd>BufDel<CR>')
 
 -- nvim tree
-vim.keymap.set('n', '<leader>ee', ':NvimTreeToggle<CR>')
-vim.keymap.set('n', '<leader>ef', ':NvimTreeFindFile<CR>')
+vim.keymap.set('n', '<C-e>e', ':NvimTreeToggle<CR>')
+vim.keymap.set('n', '<C-e>f', ':NvimTreeFindFile<CR>')
 
 -- [[ Basic Autocommands ]]
 --  See `:help lua-guide-autocommands`
