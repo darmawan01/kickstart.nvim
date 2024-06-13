@@ -30,7 +30,8 @@ return { -- Autoformat
       typescript = { { 'prettierd', 'prettier' } },
       typescriptreact = { { 'prettierd', 'prettier' } },
       python = { 'ruff_format', 'ruff_fix' },
-      go = {"goimports", "gofumpt"},
+      go = { 'goimports', 'gofumpt' },
+      sql = { 'sqlfluff' },
       -- Conform can also run multiple formatters sequentially
       -- python = { "isort", "black" },
       --
