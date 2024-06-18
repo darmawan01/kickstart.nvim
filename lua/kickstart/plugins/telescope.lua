@@ -25,7 +25,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
       end,
     },
     { 'nvim-telescope/telescope-ui-select.nvim' },
-    {'nvim-telescope/telescope-symbols.nvim'},
+    { 'nvim-telescope/telescope-symbols.nvim' },
     {
       'nvim-telescope/telescope-live-grep-args.nvim',
       -- This will not install any breaking changes.
@@ -70,6 +70,9 @@ return { -- Fuzzy Finder (files, lsp, etc)
             ['<C-q>'] = require('telescope.actions').send_selected_to_qflist + require('telescope.actions').open_qflist, -- send selected to quickfixlist
           },
         },
+        file_ignore_patterns = {
+          'node_modules',
+        },
       },
       pickers = {
         lsp_definitions = {
@@ -99,7 +102,7 @@ return { -- Fuzzy Finder (files, lsp, etc)
 
     -- See `:help telescope.builtin`
     local builtin = require 'telescope.builtin'
-    local extensions = require 'telescope'.extensions
+    local extensions = require('telescope').extensions
     vim.keymap.set('n', '<leader>s?', builtin.help_tags, { desc = '[S]earch [H]elp' })
     vim.keymap.set('n', '<leader>sk', builtin.keymaps, { desc = '[S]earch [K]eymaps' })
     vim.keymap.set('n', '<leader>sf', builtin.find_files, { desc = '[S]earch [F]iles' })
@@ -111,7 +114,6 @@ return { -- Fuzzy Finder (files, lsp, etc)
     vim.keymap.set('n', '<leader>s.', builtin.oldfiles, { desc = '[S]earch Recent Files ("." for repeat)' })
     vim.keymap.set('n', '<leader><leader>', builtin.buffers, { desc = '[ ] Find existing buffers' })
     vim.keymap.set('n', '<leader>sa', extensions.live_grep_args.live_grep_args, { desc = '[S]earch by [A]rgs' })
-
 
     -- Slightly advanced example of overriding default behavior and theme
     vim.keymap.set('n', '<leader>/', function()
