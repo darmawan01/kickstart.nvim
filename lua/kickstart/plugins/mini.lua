@@ -39,5 +39,8 @@ return { -- Collection of various small independent plugins/modules
     -- ... and there is more!
     --  Check out: https://github.com/echasnovski/mini.nvim
     require('mini.move').setup{}
+
+    require('mini.hipatterns').setup{}
+    require('mini.cursorword').setup{}
   end,
 }
