@@ -166,7 +166,16 @@ return { -- LSP Configuration & Plugins
     local lspconfig_util = require('lspconfig').util
     local servers = {
       -- clangd = {},
-      -- gopls = {},
+      gopls = {
+        on_attach = function(client)
+          local semantic = client.config.capabilities.textDocument.semanticTokens
+          client.server_capabilities.semanticTokensProvider = {
+            full = true,
+            legend = { tokenModifiers = semantic.tokenModifiers, tokenTypes = semantic.tokenTypes },
+            range = true,
+          }
+        end,
+      },
       -- pyright = {},
       -- rust_analyzer = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -175,7 +184,7 @@ return { -- LSP Configuration & Plugins
       --    https://github.com/pmizio/typescript-tools.nvim
       --
       -- But for many setups, the LSP (`tsserver`) will work just fine
-      tsserver = {
+      ts_ls = {
         on_attach = function(client, bufnr)
           -- on_attach(client, bufnr)
           vim.keymap.set('n', '<leader>ro', function()
@@ -253,7 +262,7 @@ return { -- LSP Configuration & Plugins
       },
 
       biome = {
-        single_file_support = true
+        single_file_support = true,
       },
       eslint = {},
       htmx = {},
