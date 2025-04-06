@@ -255,7 +255,7 @@ return { -- LSP Configuration & Plugins
       },
 
       -- python formatter
-      ruff_lsp = {
+      ["ruff-lsp"] = {
         on_attach = function(client)
           client.server_capabilities.hoverProvider = false
         end,
