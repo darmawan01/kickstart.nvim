@@ -166,7 +166,16 @@ return { -- LSP Configuration & Plugins
     local lspconfig_util = require('lspconfig').util
     local servers = {
       -- clangd = {},
-      -- gopls = {},
+      gopls = {
+        on_attach = function(client)
+          local semantic = client.config.capabilities.textDocument.semanticTokens
+          client.server_capabilities.semanticTokensProvider = {
+            full = true,
+            legend = { tokenModifiers = semantic.tokenModifiers, tokenTypes = semantic.tokenTypes },
+            range = true,
+          }
+        end,
+      },
       -- pyright = {},
       -- rust_analyzer = {},
       -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -246,14 +255,14 @@ return { -- LSP Configuration & Plugins
       },
 
       -- python formatter
-      -- ruff_lsp = {
-      --   on_attach = function(client)
-      --     client.server_capabilities.hoverProvider = false
-      --   end,
-      -- },
+      ["ruff-lsp"] = {
+        on_attach = function(client)
+          client.server_capabilities.hoverProvider = false
+        end,
+      },
 
       biome = {
-        single_file_support = true
+        single_file_support = true,
       },
       eslint = {},
       htmx = {},

@@ -42,16 +42,16 @@ return { -- Collection of various small independent plugins/modules
       -- Module mappings. Use `''` (empty string) to disable one.
       mappings = {
         -- Move visual selection in Visual mode. Defaults are Alt (Meta) + hjkl.
-        left = '<M-C-h>',
-        right = '<M-C-l>',
-        down = '<M-C-j>',
-        up = '<M-C-k>',
+        left = '<M-h>',
+        right = '<M-l>',
+        down = '<M-j>',
+        up = '<M-k>',
 
         -- Move current line in Normal mode
-        line_left = '<M-C-h>',
-        line_right = '<M-C-l>',
-        line_down = '<M-C-j>',
-        line_up = '<M-C-k>',
+        line_left = '<M-h>',
+        line_right = '<M-l>',
+        line_down = '<M-j>',
+        line_up = '<M-k>',
       },
 
       -- Options which control moving behavior
@@ -61,7 +61,20 @@ return { -- Collection of various small independent plugins/modules
       },
     }
 
-    require('mini.hipatterns').setup {}
     require('mini.cursorword').setup {}
+
+    local hipatterns = require 'mini.hipatterns'
+    hipatterns.setup {
+      highlighters = {
+        -- Highlight standalone 'FIXME', 'HACK', 'TODO', 'NOTE'
+        fixme = { pattern = '%f[%w]()FIXME()%f[%W]', group = 'MiniHipatternsFixme' },
+        hack = { pattern = '%f[%w]()HACK()%f[%W]', group = 'MiniHipatternsHack' },
+        todo = { pattern = '%f[%w]()TODO()%f[%W]', group = 'MiniHipatternsTodo' },
+        note = { pattern = '%f[%w]()NOTE()%f[%W]', group = 'MiniHipatternsNote' },
+
+        -- Highlight hex color strings (`#rrggbb`) using that color
+        hex_color = hipatterns.gen_highlighter.hex_color(),
+      },
+    }
   end,
 }

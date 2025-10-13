@@ -68,4 +68,7 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   end,
 })
 
+-- show function signature
 vim.keymap.set('i', '<c-s>', vim.lsp.buf.signature_help)
+
+vim.keymap.set("n", '<leader>ct', ':TSContextToggle<CR>')
