@@ -169,6 +169,8 @@ Based on kickstart.nvim, customized with additional plugins and keymaps.
 | n | `<leader>o` | Toggle code outline |
 | n | `<leader>ct` | Toggle treesitter context |
 | v | `<leader>ql` | Transform lines to quoted list |
+| n,v | `<leader>cp` | Copy relative path:line to clipboard |
+| n,v | `<leader>cP` | Copy absolute path:line to clipboard |
 
 ---
 
