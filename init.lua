@@ -809,6 +809,7 @@ require('lazy').setup({
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
+          { name = 'filemention' },
         },
       }
     end,
@@ -853,28 +854,23 @@ require('lazy').setup({
       -- - sr)'  - [S]urround [R]eplace [)] [']
       require('mini.surround').setup()
 
-      -- File explorer
+      -- File explorer: left-anchored tree (current dir) + preview pane on the right
       require('mini.files').setup {
         windows = {
           preview = true,
-          width_focus = 40,
-          width_nofocus = 25,
-          width_preview = 50,
+          width_focus = 30,
+          width_nofocus = 20,
+          width_preview = 60,
+        },
+        mappings = {
+          go_in_plus = '<CR>',
         },
       }
 
-      -- Center mini.files floating windows on screen
       vim.api.nvim_create_autocmd('User', {
         pattern = 'MiniFilesWindowOpen',
         callback = function(args)
-          local win_id = args.data.win_id
-          local config = vim.api.nvim_win_get_config(win_id)
-          local total_w = vim.o.columns
-          local total_h = vim.o.lines
-          config.row = math.floor((total_h - config.height) / 2) - 1
-          config.col = math.floor((total_w - config.width) / 2)
-          config.border = 'rounded'
-          vim.api.nvim_win_set_config(win_id, config)
+          vim.api.nvim_win_set_config(args.data.win_id, { border = 'rounded' })
         end,
       })
 
