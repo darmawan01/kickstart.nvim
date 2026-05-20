@@ -666,12 +666,12 @@ require('lazy').setup({
     lazy = false,
     keys = {
       {
-        '<leader>f',
+        '<leader>cf',
         function()
           require('conform').format { async = true, lsp_fallback = true }
         end,
         mode = '',
-        desc = '[F]ormat buffer',
+        desc = '[C]ode [F]ormat buffer',
       },
     },
     opts = {
@@ -854,7 +854,30 @@ require('lazy').setup({
       require('mini.surround').setup()
 
       -- File explorer
-      require('mini.files').setup()
+      require('mini.files').setup {
+        windows = {
+          preview = true,
+          width_focus = 40,
+          width_nofocus = 25,
+          width_preview = 50,
+        },
+      }
+
+      -- Center mini.files floating windows on screen
+      vim.api.nvim_create_autocmd('User', {
+        pattern = 'MiniFilesWindowOpen',
+        callback = function(args)
+          local win_id = args.data.win_id
+          local config = vim.api.nvim_win_get_config(win_id)
+          local total_w = vim.o.columns
+          local total_h = vim.o.lines
+          config.row = math.floor((total_h - config.height) / 2) - 1
+          config.col = math.floor((total_w - config.width) / 2)
+          config.border = 'rounded'
+          vim.api.nvim_win_set_config(win_id, config)
+        end,
+      })
+
       vim.keymap.set('n', '<leader>E', function()
         local buf_path = vim.api.nvim_buf_get_name(0)
         local dir = buf_path ~= '' and vim.fn.fnamemodify(buf_path, ':p:h') or vim.uv.cwd()
@@ -882,34 +905,32 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
+    branch = 'main',
     build = ':TSUpdate',
-    opts = {
-      ensure_installed = { 'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
-    config = function(_, opts)
-      -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
+    lazy = false,
+    config = function()
+      local ts = require 'nvim-treesitter'
 
-      -- Prefer git instead of curl in order to improve connectivity in some environments
-      require('nvim-treesitter.install').prefer_git = true
-      ---@diagnostic disable-next-line: missing-fields
-      require('nvim-treesitter').setup(opts)
+      -- main branch API: ts.install(langs). On legacy master this is nil — skip
+      -- gracefully so nvim can start and the user can run :Lazy sync to switch.
+      if type(ts.install) == 'function' then
+        ts.install {
+          'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'vim', 'vimdoc',
+        }
+      end
 
-      -- There are additional nvim-treesitter modules that you can use to interact
-      -- with nvim-treesitter. You should go explore a few and see what interests you:
-      --
-      --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-      --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-      --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
+      vim.api.nvim_create_autocmd('FileType', {
+        callback = function(args)
+          local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
+          if not lang then return end
+          local ok = pcall(vim.treesitter.language.add, lang)
+          if not ok then return end
+          pcall(vim.treesitter.start, args.buf, lang)
+          if type(ts.indentexpr) == 'function' then
+            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+          end
+        end,
+      })
     end,
   },
 
@@ -934,7 +955,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   --    For additional information, see `:help lazy.nvim-lazy.nvim-structuring-your-plugins`
-  -- { import = 'custom.plugins' },
+  { import = 'custom.plugins' },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
