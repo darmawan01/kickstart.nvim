@@ -58,6 +58,28 @@ return {
     },
   },
 
+  -- Sublime-style multi-cursor. <C-n> selects next occurrence under cursor.
+  {
+    'mg979/vim-visual-multi',
+    branch = 'master',
+    event = 'VeryLazy',
+    init = function()
+      -- Tame the defaults: keep <C-n> as "select next", and don't hijack <Tab>.
+      vim.g.VM_default_mappings = 1
+      vim.g.VM_maps = {
+        ['Find Under']         = '<C-n>',  -- select word/next match
+        ['Find Subword Under'] = '<C-n>',
+        ['Select All']         = '<leader>A', -- select all occurrences
+        ['Skip Region']        = 'q',       -- skip current selection, find next
+        ['Remove Region']      = 'Q',       -- drop last selection
+        ['Add Cursor Down']    = '<C-Down>',
+        ['Add Cursor Up']      = '<C-Up>',
+      }
+      vim.g.VM_silent_exit = 1
+      vim.g.VM_show_warnings = 0
+    end,
+  },
+
   -- Diagnostics / refs / quickfix pane
   {
     'folke/trouble.nvim',
