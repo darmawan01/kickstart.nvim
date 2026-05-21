@@ -298,6 +298,7 @@ require('lazy').setup({
 
       require('which-key').add {
         { '<leader>a', group = '[A]I / Claude' },
+        { '<leader>F', group = '[F]lutter' },
         { '<leader>c', group = '[C]ode' },
         { '<leader>d', group = '[D]ocument / [D]ebug' },
         { '<leader>g', group = '[G]it' },
@@ -933,6 +934,8 @@ require('lazy').setup({
         'go', 'gomod', 'gosum', 'gowork',
         -- rust
         'rust', 'toml',
+        -- dart / flutter
+        'dart',
         -- infra / configs
         'dockerfile', 'terraform', 'hcl',
       },
