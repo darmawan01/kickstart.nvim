@@ -658,6 +658,11 @@ require('lazy').setup({
           end,
         },
       }
+
+      -- nvim-lspconfig 2.x ships lsp/stylua.lua which spawns `stylua --lsp`.
+      -- The installed stylua doesn't support that flag; stylua is a formatter
+      -- here (via conform.nvim), not an LSP, so disable the auto-enabled server.
+      if vim.lsp.enable then vim.lsp.enable('stylua', false) end
     end,
   },
 
@@ -901,33 +906,19 @@ require('lazy').setup({
   },
   { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
-    branch = 'main',
     build = ':TSUpdate',
-    lazy = false,
-    config = function()
-      local ts = require 'nvim-treesitter'
-
-      -- main branch API: ts.install(langs). On legacy master this is nil — skip
-      -- gracefully so nvim can start and the user can run :Lazy sync to switch.
-      if type(ts.install) == 'function' then
-        ts.install {
-          'bash', 'c', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'vim', 'vimdoc',
-        }
-      end
-
-      vim.api.nvim_create_autocmd('FileType', {
-        callback = function(args)
-          local lang = vim.treesitter.language.get_lang(vim.bo[args.buf].filetype)
-          if not lang then return end
-          local ok = pcall(vim.treesitter.language.add, lang)
-          if not ok then return end
-          pcall(vim.treesitter.start, args.buf, lang)
-          if type(ts.indentexpr) == 'function' then
-            vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
-          end
-        end,
-      })
-    end,
+    main = 'nvim-treesitter.configs',
+    opts = {
+      ensure_installed = {
+        'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
+      },
+      auto_install = true,
+      highlight = {
+        enable = true,
+        additional_vim_regex_highlighting = { 'ruby' },
+      },
+      indent = { enable = true, disable = { 'ruby' } },
+    },
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the
