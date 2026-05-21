@@ -291,12 +291,15 @@ require('lazy').setup({
       require('which-key').setup()
 
       require('which-key').add {
+        { '<leader>a', group = '[A]I / Claude' },
         { '<leader>c', group = '[C]ode' },
-        { '<leader>d', group = '[D]ocument' },
+        { '<leader>d', group = '[D]ocument / [D]ebug' },
+        { '<leader>g', group = '[G]it' },
+        { '<leader>m', group = 'Har[m]oon' },
         { '<leader>r', group = '[R]ename' },
         { '<leader>s', group = '[S]earch' },
+        { '<leader>t', group = '[T]oggle / [T]rouble' },
         { '<leader>w', group = '[W]orkspace' },
-        { '<leader>t', group = '[T]oggle' },
         { '<leader>h', group = 'Git [H]unk' },
         { '<leader>h', group = 'Git [H]unk', mode = 'v' },
       }
@@ -619,12 +622,18 @@ require('lazy').setup({
         terraformls = {},
 
         -- TypeScript / JavaScript / React
-        ts_ls = {},
+        -- ts_ls disabled: replaced by typescript-tools.nvim (see custom/plugins/lang.lua)
+        -- ts_ls = {},
         eslint = {},
 
-        -- HTML / CSS
+        -- HTML / CSS / Tailwind
         html = {},
         cssls = {},
+        tailwindcss = {},
+
+        -- Docker
+        dockerls = {},
+        docker_compose_language_service = {},
       }
 
       -- Ensure the servers and tools above are installed
@@ -912,6 +921,14 @@ require('lazy').setup({
     opts = {
       ensure_installed = {
         'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
+        -- web
+        'css', 'scss', 'javascript', 'typescript', 'tsx', 'json', 'jsonc', 'yaml',
+        -- go
+        'go', 'gomod', 'gosum', 'gowork',
+        -- rust
+        'rust', 'toml',
+        -- infra / configs
+        'dockerfile', 'terraform', 'hcl',
       },
       auto_install = true,
       highlight = {
