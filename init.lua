@@ -94,12 +94,14 @@ if vim.fn.has('nvim-' .. MIN_NVIM.major .. '.' .. MIN_NVIM.minor .. '.' .. MIN_N
   -- against, so resolve the running version defensively.
   local ok, v = pcall(vim.version)
   local current = (ok and v) and string.format('%d.%d.%d', v.major, v.minor, v.patch)
-    or vim.trim(vim.fn.execute('version'):match('NVIM v([^\n]*)') or 'an unknown version')
+    or vim.trim(vim.fn.execute('version'):match 'NVIM v([^\n]*)' or 'an unknown version')
   local msg = string.format(
     'This config requires Neovim >= %d.%d.%d, but you are running %s.\n'
       .. 'Please upgrade Neovim (https://github.com/neovim/neovim/releases). '
       .. 'Skipping the rest of init.lua.',
-    MIN_NVIM.major, MIN_NVIM.minor, MIN_NVIM.patch,
+    MIN_NVIM.major,
+    MIN_NVIM.minor,
+    MIN_NVIM.patch,
     current
   )
   -- Use the lowest-common-denominator API so this works even on very old Neovim.
@@ -180,6 +182,9 @@ vim.opt.scrolloff = 10
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
+-- Reload files that changed on disk (outside of Neovim)
+vim.opt.autoread = true
+
 -- Set highlight on search, but clear on pressing <Esc> in normal mode
 vim.opt.hlsearch = true
 vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
@@ -241,6 +246,28 @@ vim.api.nvim_create_autocmd('TextYankPost', {
   group = vim.api.nvim_create_augroup('kickstart-highlight-yank', { clear = true }),
   callback = function()
     vim.highlight.on_yank()
+  end,
+})
+
+-- Auto-reload buffers when the underlying file changes on disk.
+--  `autoread` alone is passive; these events force Neovim to actually check.
+vim.api.nvim_create_autocmd({ 'FocusGained', 'BufEnter', 'CursorHold', 'CursorHoldI', 'TermClose', 'TermLeave' }, {
+  desc = 'Check if a file changed on disk and reload it',
+  group = vim.api.nvim_create_augroup('kickstart-auto-reload', { clear = true }),
+  callback = function()
+    -- Don't run checktime in command-line window or for unnamed buffers
+    if vim.fn.mode() ~= 'c' and vim.fn.getcmdwintype() == '' then
+      vim.cmd 'checktime'
+    end
+  end,
+})
+
+-- Notify when a file was changed outside of Neovim and got reloaded
+vim.api.nvim_create_autocmd('FileChangedShellPost', {
+  desc = 'Notify on external file change',
+  group = vim.api.nvim_create_augroup('kickstart-file-changed', { clear = true }),
+  callback = function()
+    vim.notify('File changed on disk. Buffer reloaded.', vim.log.levels.WARN)
   end,
 })
 
@@ -346,7 +373,11 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
+    -- Track master (not the 0.1.x stable branch): only master has the fix that
+    -- replaces the removed nvim-treesitter `ft_to_lang` API with the native
+    -- `vim.treesitter.language.get_lang`, required since treesitter moved to its
+    -- main branch for Neovim 0.12 compatibility.
+    branch = 'master',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -678,10 +709,10 @@ require('lazy').setup({
       -- for you, so that they are available from within Neovim.
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
-        'stylua',    -- Lua
+        'stylua', -- Lua
         'goimports', -- Go (format + organize imports)
-        'prettier',  -- JS/TS/HTML/CSS/YAML/JSON
-        'tflint',    -- Terraform linter
+        'prettier', -- JS/TS/HTML/CSS/YAML/JSON
+        'tflint', -- Terraform linter
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
@@ -701,7 +732,9 @@ require('lazy').setup({
       -- nvim-lspconfig 2.x ships lsp/stylua.lua which spawns `stylua --lsp`.
       -- The installed stylua doesn't support that flag; stylua is a formatter
       -- here (via conform.nvim), not an LSP, so disable the auto-enabled server.
-      if vim.lsp.enable then vim.lsp.enable('stylua', false) end
+      if vim.lsp.enable then
+        vim.lsp.enable('stylua', false)
+      end
     end,
   },
 
@@ -731,18 +764,18 @@ require('lazy').setup({
         }
       end,
       formatters_by_ft = {
-        lua        = { 'stylua' },
-        go         = { 'goimports' },
-        terraform  = { 'terraform_fmt' },
-        yaml       = { 'prettier' },
-        json       = { 'prettier' },
+        lua = { 'stylua' },
+        go = { 'goimports' },
+        terraform = { 'terraform_fmt' },
+        yaml = { 'prettier' },
+        json = { 'prettier' },
         javascript = { 'prettier' },
         typescript = { 'prettier' },
         javascriptreact = { 'prettier' },
         typescriptreact = { 'prettier' },
-        html       = { 'prettier' },
-        css        = { 'prettier' },
-        scss       = { 'prettier' },
+        html = { 'prettier' },
+        css = { 'prettier' },
+        scss = { 'prettier' },
       },
     },
   },
@@ -959,17 +992,39 @@ require('lazy').setup({
 
       -- Install (async; no-op if already present). Run :TSUpdate to update them.
       ts.install {
-        'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
         -- web
-        'css', 'scss', 'javascript', 'typescript', 'tsx', 'json', 'yaml', -- jsonc filetype reuses the json parser
+        'css',
+        'scss',
+        'javascript',
+        'typescript',
+        'tsx',
+        'json',
+        'yaml', -- jsonc filetype reuses the json parser
         -- go
-        'go', 'gomod', 'gosum', 'gowork',
+        'go',
+        'gomod',
+        'gosum',
+        'gowork',
         -- rust
-        'rust', 'toml',
+        'rust',
+        'toml',
         -- dart / flutter
         'dart',
         -- infra / configs
-        'dockerfile', 'terraform', 'hcl',
+        'dockerfile',
+        'terraform',
+        'hcl',
       }
 
       -- Enable treesitter highlighting + (experimental) indentation per buffer,
@@ -1005,7 +1060,7 @@ require('lazy').setup({
   -- require 'kickstart.plugins.lint',
   -- require 'kickstart.plugins.autopairs',
   -- require 'kickstart.plugins.neo-tree',
-  -- require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
+  require 'kickstart.plugins.gitsigns', -- adds gitsigns recommend keymaps
 
   -- NOTE: The import below can automatically add your own plugins, configuration, etc from `lua/custom/plugins/*.lua`
   --    This is the easiest way to modularize your config.

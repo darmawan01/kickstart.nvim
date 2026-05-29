@@ -6,6 +6,19 @@ return {
   {
     'lewis6991/gitsigns.nvim',
     opts = {
+      -- Inline character-level diff highlighting (like VSCode's inline changes)
+      word_diff = true,
+      -- Color the number column for changed lines too, not just the sign column
+      numhl = true,
+      -- Inline "git blame" virtual text at the end of the current line (GitLens-style).
+      -- On by default (GitLens-style); toggle with <leader>tb (mapped below).
+      current_line_blame = true,
+      current_line_blame_opts = {
+        virt_text = true,
+        virt_text_pos = 'eol',
+        delay = 300,
+      },
+      current_line_blame_formatter = '  <author>, <author_time:%R> · <summary>',
       on_attach = function(bufnr)
         local gitsigns = require 'gitsigns'
 
