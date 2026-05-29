@@ -14,10 +14,39 @@ A starting point for Neovim that is:
 
 ### Install Neovim
 
+**Requires Neovim >= 0.10.0.** This config uses modern APIs (`vim.keymap`,
+lazy.nvim, the built-in LSP client, etc.) that do not exist on older versions.
+If your Neovim is too old, `init.lua` will print a clear warning and stop
+instead of erroring out. Check your version with `nvim --version`.
+
+> **Heads up:** distro package managers often ship an ancient Neovim
+> (e.g. Ubuntu/Pop!_OS `apt` pins 0.6.1). Prefer the official prebuilt release.
+
 Kickstart.nvim targets *only* the latest
 ['stable'](https://github.com/neovim/neovim/releases/tag/stable) and latest
 ['nightly'](https://github.com/neovim/neovim/releases/tag/nightly) of Neovim.
 If you are experiencing issues, please make sure you have the latest versions.
+
+<details><summary>Install the latest Neovim on Linux (official tarball)</summary>
+
+```sh
+# Download and install to /opt, then symlink into PATH
+curl -fsSL -o /tmp/nvim-linux-x86_64.tar.gz \
+  https://github.com/neovim/neovim/releases/download/stable/nvim-linux-x86_64.tar.gz
+sudo rm -rf /opt/nvim
+sudo tar -C /opt -xzf /tmp/nvim-linux-x86_64.tar.gz
+sudo mv /opt/nvim-linux-x86_64 /opt/nvim
+sudo ln -sf /opt/nvim/bin/nvim /usr/local/bin/nvim
+
+# If you previously installed via apt, remove the old shadowed version:
+# sudo apt remove neovim neovim-runtime
+
+nvim --version   # confirm it reports the new version
+```
+
+To update later, re-run the download + extract steps above.
+
+</details>
 
 ### Install External Dependencies
 

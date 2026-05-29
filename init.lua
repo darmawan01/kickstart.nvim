@@ -84,6 +84,29 @@ I hope you enjoy your Neovim journey,
 P.S. You can delete this when you're done too. It's your config now! :)
 --]]
 
+-- [[ Neovim version guard ]]
+--  This config relies on modern APIs (vim.keymap, lazy.nvim, built-in LSP, etc.)
+--  that don't exist on old Neovim. Fail with a clear message instead of a
+--  cryptic "attempt to index field 'keymap' (a nil value)" error.
+local MIN_NVIM = { major = 0, minor = 10, patch = 0 }
+if vim.fn.has('nvim-' .. MIN_NVIM.major .. '.' .. MIN_NVIM.minor .. '.' .. MIN_NVIM.patch) ~= 1 then
+  -- vim.version() itself may not exist on the ancient versions we're guarding
+  -- against, so resolve the running version defensively.
+  local ok, v = pcall(vim.version)
+  local current = (ok and v) and string.format('%d.%d.%d', v.major, v.minor, v.patch)
+    or vim.trim(vim.fn.execute('version'):match('NVIM v([^\n]*)') or 'an unknown version')
+  local msg = string.format(
+    'This config requires Neovim >= %d.%d.%d, but you are running %s.\n'
+      .. 'Please upgrade Neovim (https://github.com/neovim/neovim/releases). '
+      .. 'Skipping the rest of init.lua.',
+    MIN_NVIM.major, MIN_NVIM.minor, MIN_NVIM.patch,
+    current
+  )
+  -- Use the lowest-common-denominator API so this works even on very old Neovim.
+  vim.api.nvim_echo({ { msg, 'WarningMsg' } }, true, {})
+  return
+end
+
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
