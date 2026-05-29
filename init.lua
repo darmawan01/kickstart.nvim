@@ -944,15 +944,24 @@ require('lazy').setup({
     end,
   },
   { -- Highlight, edit, and navigate code
+    -- NOTE: `main` branch (required for Neovim 0.12+). The frozen `master` branch
+    -- only supports 0.10/0.11 and crashes the highlighter on 0.12. The `main`
+    -- branch is a full rewrite with no modules: Neovim drives highlight/indent/folds
+    -- directly, and this plugin just installs parsers + ships queries.
+    -- Requires `tree-sitter-cli` (>=0.26.1) on PATH to compile parsers via :TSUpdate.
     'nvim-treesitter/nvim-treesitter',
-    branch = 'master',
+    branch = 'main',
+    lazy = false, -- the main branch does not support lazy-loading
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs',
-    opts = {
-      ensure_installed = {
+    config = function()
+      local ts = require 'nvim-treesitter'
+      ts.setup {}
+
+      -- Install (async; no-op if already present). Run :TSUpdate to update them.
+      ts.install {
         'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc',
         -- web
-        'css', 'scss', 'javascript', 'typescript', 'tsx', 'json', 'jsonc', 'yaml',
+        'css', 'scss', 'javascript', 'typescript', 'tsx', 'json', 'yaml', -- jsonc filetype reuses the json parser
         -- go
         'go', 'gomod', 'gosum', 'gowork',
         -- rust
@@ -961,14 +970,25 @@ require('lazy').setup({
         'dart',
         -- infra / configs
         'dockerfile', 'terraform', 'hcl',
-      },
-      auto_install = true,
-      highlight = {
-        enable = true,
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
+      }
+
+      -- Enable treesitter highlighting + (experimental) indentation per buffer,
+      -- but only where a parser is actually available. Filetypes without a parser
+      -- (e.g. ruby here) silently fall back to Vim's regex syntax/indent.
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('ts-enable', { clear = true }),
+        callback = function(args)
+          local buf = args.buf
+          if not vim.treesitter.language.get_lang(vim.bo[buf].filetype) then
+            return
+          end
+          if not pcall(vim.treesitter.start, buf) then
+            return
+          end
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end,
+      })
+    end,
   },
 
   -- The following two comments only work if you have downloaded the kickstart repo, not just copy pasted the

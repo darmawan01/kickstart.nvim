@@ -54,6 +54,8 @@ External Requirements:
 - Basic utils: `git`, `make`, `unzip`, C Compiler (`gcc`)
 - [ripgrep](https://github.com/BurntSushi/ripgrep#installation)
 - Clipboard tool (xclip/xsel/win32yank or other depending on platform)
+- [`tree-sitter-cli`](https://github.com/tree-sitter/tree-sitter) (>= 0.26.1),
+  plus `curl` and `tar` — required by nvim-treesitter (see note below)
 - A [Nerd Font](https://www.nerdfonts.com/): optional, provides various icons
   - if you have it set `vim.g.have_nerd_font` in `init.lua` to true
 - Language Setup:
@@ -64,6 +66,29 @@ External Requirements:
 > **NOTE**
 > See [Install Recipes](#Install-Recipes) for additional Windows and Linux specific notes
 > and quick install snippets
+
+#### Treesitter (Neovim 0.12+ required)
+
+This config runs **nvim-treesitter on the `main` branch**. The old `master`
+branch is frozen and only supports Neovim 0.10/0.11 — on 0.12+ it crashes the
+highlighter with `attempt to call method 'range' (a nil value)`. The `main`
+branch is a full rewrite and has different requirements:
+
+- **Neovim >= 0.12** (the `main` branch does not support older versions).
+- **`tree-sitter-cli` >= 0.26.1** on your `PATH`, installed via a package
+  manager — **not npm**. With Rust available, the simplest route is:
+  ```sh
+  cargo install tree-sitter-cli
+  ```
+  (Prebuilt binaries are also published on the
+  [tree-sitter releases](https://github.com/tree-sitter/tree-sitter/releases) page.)
+- `curl` and `tar` (used to download parser sources) and a C compiler.
+
+Parsers are installed/updated with `:TSUpdate` and live under
+`~/.local/share/nvim/site/parser/`. Highlighting and indentation are enabled
+per-buffer by a `FileType` autocommand in `init.lua` (the `main` branch no
+longer has highlight/indent "modules"). Filetypes without an installed parser
+fall back to Vim's built-in regex syntax.
 
 ### Install Kickstart
 
